@@ -1,0 +1,4 @@
+[submodule "shipmvp"]
+	path = shipmvp
+	url = https://github.com/shipmvp/shipmvp
+	branch = stable

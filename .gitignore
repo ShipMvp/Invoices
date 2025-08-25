@@ -1,0 +1,79 @@
+# Visual Studio
+.vs/
+*.suo
+*.user
+*.userosscache
+*.sln.docstates
+
+# Build output
+bin/
+obj/
+out/
+
+# Rider
+.idea/
+*.sln.iml
+
+# Visual Studio Code
+.vscode/
+
+# NuGet
+*.nupkg
+*.snupkg
+.nuget/
+packages/
+
+# Dotnet
+*.dll
+*.exe
+*.pdb
+*.ilk
+*.log
+*.cache
+
+# Publish
+publish/
+
+# EF and design-time files
+**/Migrations/**/bin/
+**/Migrations/**/obj/
+
+# User secrets and local settings
+secrets.json
+**/appsettings.Development.json
+
+# Test results
+TestResults/
+*.trx
+coverage/
+
+# Logs
+logs/
+*.log
+
+# OS files
+Thumbs.db
+.DS_Store
+
+# Node
+node_modules/
+
+# Docker
+docker-compose.override.yml
+.env
+
+# Azure
+.azure/
+
+# Generated code
+Generated/
+*.g.cs
+*.g.i.cs
+
+# Temporary
+*.tmp
+*.temp
+
+# Ignore build artifacts inside the shipmvp submodule (submodule itself remains tracked)
+shipmvp/**/bin/
+shipmvp/**/obj/
