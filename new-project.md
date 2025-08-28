@@ -253,4 +253,4 @@ dotnet ef database update \
 
 
 
-
+dotnet run --project 'apps/backend/Invoice.Api'

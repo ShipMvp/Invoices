@@ -15,22 +15,23 @@ using ShipMvp.Integration.SemanticKernel;
 using System.Text.RegularExpressions;
 using System.Reflection;
 using Invoice.Api.Data;
+using Invoices;
 namespace Invoice.Api;
 
 [Module]
 [DependsOn<HostModule>]
 [DependsOn<InvoiceDbModule>]
+[DependsOn<InvoicesModule>]
 public class InvoiceHostModule : IModule
 {
     public void ConfigureServices(IServiceCollection services)
     {
-
+       
     }
+
 
     public void Configure(IApplicationBuilder app, IHostEnvironment env)
     {
 
     }
-
-
 }

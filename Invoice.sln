@@ -11,7 +11,7 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Invoice.Api", "apps\backend
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "modules", "modules", "{CA253913-39DE-BFD0-C9A3-4B7EC6FBDF17}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Invoice", "modules\Invoice\Invoice.csproj", "{78F46721-F8A5-4AB9-A015-5ECC7EB0D71A}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Invoice", "modules\Invoices\Invoice.csproj", "{78F46721-F8A5-4AB9-A015-5ECC7EB0D71A}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "shipmvp", "shipmvp", "{3EEA4A63-DD7B-CA5F-6D13-0117C17D5332}"
 EndProject

@@ -16,7 +16,7 @@
   <ItemGroup>
     <ProjectReference Include="..\..\..\shipmvp\ShipMvp.Application\ShipMvp.Application.csproj" />
     <ProjectReference Include="..\..\..\shipmvp\ShipMvp.Core\ShipMvp.Core.csproj" />
-    <ProjectReference Include="..\..\..\modules\Invoice\Invoice.csproj" />
+  <ProjectReference Include="..\..\..\modules\Invoices\Invoice.csproj" />
     <ProjectReference Include="..\..\..\shipmvp\ShipMvp.Api\ShipMvp.Api.csproj" />
   </ItemGroup>
 </Project>
