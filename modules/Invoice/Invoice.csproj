@@ -2,10 +2,13 @@
 
   <ItemGroup>
     <ProjectReference Include="..\..\shipmvp\ShipMvp.Core\ShipMvp.Core.csproj" />
+    <ProjectReference Include="..\..\shipmvp\ShipMvp.Domain\ShipMvp.Domain.csproj" />
+    <ProjectReference Include="..\..\shipmvp\ShipMvp.Application\ShipMvp.Application.csproj" />
   </ItemGroup>
 
   <ItemGroup>
     <PackageReference Include="Microsoft.EntityFrameworkCore" Version="9.0.8" />
+    <PackageReference Include="Microsoft.EntityFrameworkCore.Relational" Version="9.0.8" />
   </ItemGroup>
 
   <PropertyGroup>

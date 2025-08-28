@@ -1,29 +1,28 @@
-using Microsoft.EntityFrameworkCore;
-using ShipMvp.Application.Infrastructure.Data;
+using ShipMvp.Api;
+using ShipMvp.Core.Modules;
+using Invoice.Api;
 
 var builder = WebApplication.CreateBuilder(args);
 
-// One DB for all modules; migrations in Invoice.Migrations
-builder.Services.AddDbContext<AppDbContext>(opts =>
+// Ensure Data Protection is registered early so services depending on IDataProtectionProvider can be validated
+builder.Services.AddDataProtection();
+
+// Add HostModule type, and let ModuleContainer resolve dependencies like ApiModule
+builder.Services.AddModules(
+    typeof(InvoiceHostModule)
+);
+
+try
 {
-    var cs = builder.Configuration.GetConnectionString("Default")
-          ?? "Host=localhost;Port=5432;Database=shipmvp;Username=postgres;Password=ShipMVPPass123!";
-    opts.UseNpgsql(cs, b => b.MigrationsAssembly("Invoice.Migrations"));
-});
+    var app = builder.Build();
 
-builder.AddDiscoveredModules(); // auto-wires modules implementing IShipMvpModule
+    // Configure modules (this will apply other middleware)
+    app.ConfigureModules(app.Environment);
 
-builder.Services.AddEndpointsApiExplorer();
-builder.Services.AddSwaggerGen();
-
-var app = builder.Build();
-
-app.UseSwagger();
-app.UseSwaggerUI();
-
-app.MapGet("/", () => Results.Ok("Invoice API running"));
-app.MapDiscoveredModules();
-
-app.UseHttpsRedirection();
-
-app.Run();
+    app.Run();
+}
+catch (Exception ex)
+{
+    Console.WriteLine($"Error during app build: {ex.Message}");
+    throw;
+}

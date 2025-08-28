@@ -229,4 +229,28 @@ public sealed class InvoiceModule : IShipMvpModule
 - Use `dotnet ef migrations add Initial --project apps/backend/Invoice.Migrations --startup-project apps/backend/Invoice.Api` to create migrations (requires EF CLI/tools).
 - Keep ShipMvp submodule updated intentionally (use branch/tag strategy for stability).
 
-That's it — the file has been reformatted for readability and copy-paste usage.
+
+
+
+docker run --name shipmvp-postgres \
+  -e POSTGRES_USER=postgres \
+  -e POSTGRES_PASSWORD=ShipMVPPass123! \
+  -e POSTGRES_DB=shipmvp \
+  -e PGDATA=/var/lib/postgresql/data/pgdata \
+  -p 5432:5432 \
+  -v shipmvp-postgres-data:/var/lib/postgresql/data \
+  --restart unless-stopped \
+  -d postgres:latest
+
+
+# from repo root (or the API folder)
+dotnet ef migrations add Initial \
+  --startup-project apps/backend/Invoice.Api \
+  --context InvoiceDbContext
+
+dotnet ef database update \
+  --project apps/backend/Invoice.Api
+
+
+
+
