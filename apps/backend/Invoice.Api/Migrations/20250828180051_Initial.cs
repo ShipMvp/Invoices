@@ -41,8 +41,7 @@ namespace Invoice.Api.Migrations
                     IsDeleted = table.Column<bool>(type: "boolean", nullable: false),
                     DeletedAt = table.Column<DateTime>(type: "timestamp with time zone", nullable: true),
                     DeletedBy = table.Column<Guid>(type: "uuid", nullable: true),
-                    EntityVersion = table.Column<int>(type: "integer", nullable: false),
-                    ExtraProperties = table.Column<Dictionary<string, object>>(type: "jsonb", nullable: false)
+                    EntityVersion = table.Column<int>(type: "integer", nullable: false)
                 },
                 constraints: table =>
                 {
@@ -67,8 +66,7 @@ namespace Invoice.Api.Migrations
                     IsDeleted = table.Column<bool>(type: "boolean", nullable: false),
                     DeletedAt = table.Column<DateTime>(type: "timestamp with time zone", nullable: true),
                     DeletedBy = table.Column<Guid>(type: "uuid", nullable: true),
-                    EntityVersion = table.Column<int>(type: "integer", nullable: false),
-                    ExtraProperties = table.Column<Dictionary<string, object>>(type: "jsonb", nullable: false)
+                    EntityVersion = table.Column<int>(type: "integer", nullable: false)
                 },
                 constraints: table =>
                 {
@@ -82,9 +80,16 @@ namespace Invoice.Api.Migrations
                 {
                     Id = table.Column<Guid>(type: "uuid", nullable: false),
                     CustomerName = table.Column<string>(type: "character varying(200)", maxLength: 200, nullable: false),
-                    Amount = table.Column<decimal>(type: "numeric(18,2)", nullable: false),
+                    TotalAmount = table.Column<decimal>(type: "numeric(18,2)", nullable: false),
+                    Status = table.Column<int>(type: "integer", maxLength: 50, nullable: false),
                     CreatedAt = table.Column<DateTime>(type: "timestamp with time zone", nullable: false, defaultValueSql: "now()"),
-                    ExtraProperties = table.Column<Dictionary<string, object>>(type: "jsonb", nullable: true)
+                    CreatedBy = table.Column<Guid>(type: "uuid", nullable: true),
+                    UpdatedAt = table.Column<DateTime>(type: "timestamp with time zone", nullable: true),
+                    UpdatedBy = table.Column<Guid>(type: "uuid", nullable: true),
+                    IsDeleted = table.Column<bool>(type: "boolean", nullable: false),
+                    DeletedAt = table.Column<DateTime>(type: "timestamp with time zone", nullable: true),
+                    DeletedBy = table.Column<Guid>(type: "uuid", nullable: true),
+                    EntityVersion = table.Column<int>(type: "integer", nullable: false)
                 },
                 constraints: table =>
                 {
@@ -122,8 +127,7 @@ namespace Invoice.Api.Migrations
                     IsDeleted = table.Column<bool>(type: "boolean", nullable: false),
                     DeletedAt = table.Column<DateTime>(type: "timestamp with time zone", nullable: true),
                     DeletedBy = table.Column<Guid>(type: "uuid", nullable: true),
-                    EntityVersion = table.Column<int>(type: "integer", nullable: false),
-                    ExtraProperties = table.Column<Dictionary<string, object>>(type: "jsonb", nullable: false)
+                    EntityVersion = table.Column<int>(type: "integer", nullable: false)
                 },
                 constraints: table =>
                 {
@@ -135,7 +139,6 @@ namespace Invoice.Api.Migrations
                 columns: table => new
                 {
                     Id = table.Column<string>(type: "text", nullable: false),
-                    ExtraProperties = table.Column<Dictionary<string, object>>(type: "jsonb", nullable: true),
                     ClientId = table.Column<string>(type: "character varying(100)", maxLength: 100, nullable: true),
                     ClientSecret = table.Column<string>(type: "text", nullable: true),
                     ConcurrencyToken = table.Column<string>(type: "character varying(50)", maxLength: 50, nullable: true),
@@ -159,7 +162,6 @@ namespace Invoice.Api.Migrations
                 columns: table => new
                 {
                     Id = table.Column<string>(type: "text", nullable: false),
-                    ExtraProperties = table.Column<Dictionary<string, object>>(type: "jsonb", nullable: true),
                     ConcurrencyToken = table.Column<string>(type: "character varying(50)", maxLength: 50, nullable: true),
                     Description = table.Column<string>(type: "text", nullable: true),
                     Descriptions = table.Column<string>(type: "text", nullable: true),
@@ -199,8 +201,7 @@ namespace Invoice.Api.Migrations
                     IsDeleted = table.Column<bool>(type: "boolean", nullable: false),
                     DeletedAt = table.Column<DateTime>(type: "timestamp with time zone", nullable: true),
                     DeletedBy = table.Column<Guid>(type: "uuid", nullable: true),
-                    EntityVersion = table.Column<int>(type: "integer", nullable: false),
-                    ExtraProperties = table.Column<Dictionary<string, object>>(type: "jsonb", nullable: false)
+                    EntityVersion = table.Column<int>(type: "integer", nullable: false)
                 },
                 constraints: table =>
                 {
@@ -223,8 +224,7 @@ namespace Invoice.Api.Migrations
                     IsDeleted = table.Column<bool>(type: "boolean", nullable: false),
                     DeletedAt = table.Column<DateTime>(type: "timestamp with time zone", nullable: true),
                     DeletedBy = table.Column<Guid>(type: "uuid", nullable: true),
-                    EntityVersion = table.Column<int>(type: "integer", nullable: false),
-                    ExtraProperties = table.Column<Dictionary<string, object>>(type: "jsonb", nullable: false)
+                    EntityVersion = table.Column<int>(type: "integer", nullable: false)
                 },
                 constraints: table =>
                 {
@@ -255,8 +255,7 @@ namespace Invoice.Api.Migrations
                     IsDeleted = table.Column<bool>(type: "boolean", nullable: false),
                     DeletedAt = table.Column<DateTime>(type: "timestamp with time zone", nullable: true),
                     DeletedBy = table.Column<Guid>(type: "uuid", nullable: true),
-                    EntityVersion = table.Column<int>(type: "integer", nullable: false),
-                    ExtraProperties = table.Column<Dictionary<string, object>>(type: "jsonb", nullable: false)
+                    EntityVersion = table.Column<int>(type: "integer", nullable: false)
                 },
                 constraints: table =>
                 {
@@ -278,8 +277,7 @@ namespace Invoice.Api.Migrations
                     CreatedBy = table.Column<Guid>(type: "uuid", nullable: true),
                     UpdatedBy = table.Column<Guid>(type: "uuid", nullable: true),
                     DeletedBy = table.Column<Guid>(type: "uuid", nullable: true),
-                    EntityVersion = table.Column<int>(type: "integer", nullable: false),
-                    ExtraProperties = table.Column<Dictionary<string, object>>(type: "jsonb", nullable: false)
+                    EntityVersion = table.Column<int>(type: "integer", nullable: false)
                 },
                 constraints: table =>
                 {
@@ -293,11 +291,40 @@ namespace Invoice.Api.Migrations
                 });
 
             migrationBuilder.CreateTable(
+                name: "InvoiceItems",
+                schema: "Invoice",
+                columns: table => new
+                {
+                    Id = table.Column<Guid>(type: "uuid", nullable: false),
+                    Description = table.Column<string>(type: "character varying(500)", maxLength: 500, nullable: false),
+                    Amount = table.Column<decimal>(type: "numeric(18,2)", nullable: false),
+                    InvoiceId = table.Column<Guid>(type: "uuid", nullable: false),
+                    CreatedAt = table.Column<DateTime>(type: "timestamp with time zone", nullable: false),
+                    CreatedBy = table.Column<Guid>(type: "uuid", nullable: true),
+                    UpdatedAt = table.Column<DateTime>(type: "timestamp with time zone", nullable: true),
+                    UpdatedBy = table.Column<Guid>(type: "uuid", nullable: true),
+                    IsDeleted = table.Column<bool>(type: "boolean", nullable: false),
+                    DeletedAt = table.Column<DateTime>(type: "timestamp with time zone", nullable: true),
+                    DeletedBy = table.Column<Guid>(type: "uuid", nullable: true),
+                    EntityVersion = table.Column<int>(type: "integer", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_InvoiceItems", x => x.Id);
+                    table.ForeignKey(
+                        name: "FK_InvoiceItems_Invoices_InvoiceId",
+                        column: x => x.InvoiceId,
+                        principalSchema: "Invoice",
+                        principalTable: "Invoices",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
+                });
+
+            migrationBuilder.CreateTable(
                 name: "OpenIddictAuthorizations",
                 columns: table => new
                 {
                     Id = table.Column<string>(type: "text", nullable: false),
-                    ExtraProperties = table.Column<Dictionary<string, object>>(type: "jsonb", nullable: true),
                     ApplicationId = table.Column<string>(type: "text", nullable: true),
                     ConcurrencyToken = table.Column<string>(type: "character varying(50)", maxLength: 50, nullable: true),
                     CreationDate = table.Column<DateTime>(type: "timestamp with time zone", nullable: true),
@@ -338,8 +365,7 @@ namespace Invoice.Api.Migrations
                     IsDeleted = table.Column<bool>(type: "boolean", nullable: false),
                     DeletedAt = table.Column<DateTime>(type: "timestamp with time zone", nullable: true),
                     DeletedBy = table.Column<Guid>(type: "uuid", nullable: true),
-                    EntityVersion = table.Column<int>(type: "integer", nullable: false),
-                    ExtraProperties = table.Column<Dictionary<string, object>>(type: "jsonb", nullable: false)
+                    EntityVersion = table.Column<int>(type: "integer", nullable: false)
                 },
                 constraints: table =>
                 {
@@ -368,8 +394,7 @@ namespace Invoice.Api.Migrations
                     IsDeleted = table.Column<bool>(type: "boolean", nullable: false),
                     DeletedAt = table.Column<DateTime>(type: "timestamp with time zone", nullable: true),
                     DeletedBy = table.Column<Guid>(type: "uuid", nullable: true),
-                    EntityVersion = table.Column<int>(type: "integer", nullable: false),
-                    ExtraProperties = table.Column<Dictionary<string, object>>(type: "jsonb", nullable: false)
+                    EntityVersion = table.Column<int>(type: "integer", nullable: false)
                 },
                 constraints: table =>
                 {
@@ -387,7 +412,6 @@ namespace Invoice.Api.Migrations
                 columns: table => new
                 {
                     Id = table.Column<string>(type: "text", nullable: false),
-                    ExtraProperties = table.Column<Dictionary<string, object>>(type: "jsonb", nullable: true),
                     ApplicationId = table.Column<string>(type: "text", nullable: true),
                     AuthorizationId = table.Column<string>(type: "text", nullable: true),
                     ConcurrencyToken = table.Column<string>(type: "character varying(50)", maxLength: 50, nullable: true),
@@ -462,6 +486,12 @@ namespace Invoice.Api.Migrations
                 table: "Integrations",
                 column: "Name",
                 unique: true);
+
+            migrationBuilder.CreateIndex(
+                name: "IX_InvoiceItems_InvoiceId",
+                schema: "Invoice",
+                table: "InvoiceItems",
+                column: "InvoiceId");
 
             migrationBuilder.CreateIndex(
                 name: "IX_OpenIddictApplications_ClientId",
@@ -555,7 +585,7 @@ namespace Invoice.Api.Migrations
                 name: "Files");
 
             migrationBuilder.DropTable(
-                name: "Invoices",
+                name: "InvoiceItems",
                 schema: "Invoice");
 
             migrationBuilder.DropTable(
@@ -578,6 +608,10 @@ namespace Invoice.Api.Migrations
 
             migrationBuilder.DropTable(
                 name: "IntegrationCredentials");
+
+            migrationBuilder.DropTable(
+                name: "Invoices",
+                schema: "Invoice");
 
             migrationBuilder.DropTable(
                 name: "OpenIddictAuthorizations");

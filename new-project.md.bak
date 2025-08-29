@@ -16,8 +16,7 @@ This project implements a complete invoice management system with:
 Invoice.sln
 ├── apps/
 │   ├── backend/
-│   │   ├── Invoice.Api/           # Main API application
-│   │   └── Invoice.CLI/           # Command-line interface tool
+│   │   └── Invoice.Api/           # Main API application
 │   └── frontend/                  # React frontend application
 ├── modules/
 │   └── Invoices/                  # Invoice module (Clean Architecture)
@@ -118,43 +117,6 @@ npm run dev
 ```
 
 The frontend will be available at `http://localhost:5173`
-
-### 5. Command Line Interface (CLI)
-
-The Invoice.CLI provides command-line tools for database management and administrative tasks:
-
-```bash
-cd apps/backend/Invoice.CLI
-
-# Show available commands
-dotnet run
-
-# Seed initial application data
-dotnet run seed-data
-
-# Seed integration platforms
-dotnet run seed-integrations
-
-# Execute SQL queries
-dotnet run run-sql "SELECT * FROM Invoices"
-```
-
-#### Available CLI Commands
-
-| Command | Description |
-|---------|-------------|
-| `seed-data` | Seeds initial application data (users, subscription plans, etc.) |
-| `seed-integrations` | Seeds integration platform configurations |
-| `run-sql` | Executes custom SQL queries against the database |
-| `help` | Shows detailed help information |
-
-#### CLI Architecture
-
-- **Framework**: Uses ShipMvp.CLI command framework
-- **Dependency Injection**: Inherits all services from Invoice.Api
-- **Database Access**: Uses same InvoiceDbContext as the main API
-- **Modular Design**: Commands are discoverable and extensible
-
 
 ## 🏗️ Architecture
 
@@ -324,14 +286,6 @@ ENTRYPOINT ["dotnet", "Invoice.Api.dll"]
 2. **Database connection**: Verify PostgreSQL is running and connection string is correct
 3. **Migration errors**: Check entity configurations and relationships
 4. **DI issues**: Verify service registrations in module configuration
-5. **CLI command failures**: Ensure database is running and Invoice.Api dependencies are properly referenced
-
-#### CLI Troubleshooting
-
-- **IDbContext not found**: Verify InvoiceDbModule is registered in CLI Program.cs
-- **Command not recognized**: Check that CLIModule is properly loaded
-- **Database connection**: CLI uses same connection string as main API
-- **Seed data errors**: May indicate database schema issues or missing migrations
 
 #### Logs Location
 

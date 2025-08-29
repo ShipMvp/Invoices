@@ -23,7 +23,56 @@ namespace Invoice.Api.Migrations
 
             NpgsqlModelBuilderExtensions.UseIdentityByDefaultColumns(modelBuilder);
 
-            modelBuilder.Entity("Invoice", b =>
+            modelBuilder.Entity("Invoices.Domain.Invoice", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("timestamp with time zone")
+                        .HasDefaultValueSql("now()");
+
+                    b.Property<Guid?>("CreatedBy")
+                        .HasColumnType("uuid");
+
+                    b.Property<string>("CustomerName")
+                        .IsRequired()
+                        .HasMaxLength(200)
+                        .HasColumnType("character varying(200)");
+
+                    b.Property<DateTime?>("DeletedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<Guid?>("DeletedBy")
+                        .HasColumnType("uuid");
+
+                    b.Property<int>("EntityVersion")
+                        .HasColumnType("integer");
+
+                    b.Property<bool>("IsDeleted")
+                        .HasColumnType("boolean");
+
+                    b.Property<int>("Status")
+                        .HasMaxLength(50)
+                        .HasColumnType("integer");
+
+                    b.Property<decimal>("TotalAmount")
+                        .HasColumnType("numeric(18,2)");
+
+                    b.Property<DateTime?>("UpdatedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<Guid?>("UpdatedBy")
+                        .HasColumnType("uuid");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("Invoices", "Invoice");
+                });
+
+            modelBuilder.Entity("Invoices.Domain.InvoiceItem", b =>
                 {
                     b.Property<Guid>("Id")
                         .ValueGeneratedOnAdd()
@@ -33,22 +82,42 @@ namespace Invoice.Api.Migrations
                         .HasColumnType("numeric(18,2)");
 
                     b.Property<DateTime>("CreatedAt")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("timestamp with time zone")
-                        .HasDefaultValueSql("now()");
+                        .HasColumnType("timestamp with time zone");
 
-                    b.Property<string>("CustomerName")
+                    b.Property<Guid?>("CreatedBy")
+                        .HasColumnType("uuid");
+
+                    b.Property<DateTime?>("DeletedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<Guid?>("DeletedBy")
+                        .HasColumnType("uuid");
+
+                    b.Property<string>("Description")
                         .IsRequired()
-                        .HasMaxLength(200)
-                        .HasColumnType("character varying(200)");
+                        .HasMaxLength(500)
+                        .HasColumnType("character varying(500)");
 
-                    b.Property<Dictionary<string, object>>("ExtraProperties")
-                        .HasColumnType("jsonb")
-                        .HasColumnName("ExtraProperties");
+                    b.Property<int>("EntityVersion")
+                        .HasColumnType("integer");
+
+                    b.Property<Guid>("InvoiceId")
+                        .HasColumnType("uuid");
+
+                    b.Property<bool>("IsDeleted")
+                        .HasColumnType("boolean");
+
+                    b.Property<DateTime?>("UpdatedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<Guid?>("UpdatedBy")
+                        .HasColumnType("uuid");
 
                     b.HasKey("Id");
 
-                    b.ToTable("Invoices", "Invoice");
+                    b.HasIndex("InvoiceId");
+
+                    b.ToTable("InvoiceItems", "Invoice");
                 });
 
             modelBuilder.Entity("OpenIddict.EntityFrameworkCore.Models.OpenIddictEntityFrameworkCoreApplication", b =>
@@ -78,10 +147,6 @@ namespace Invoice.Api.Migrations
 
                     b.Property<string>("DisplayNames")
                         .HasColumnType("text");
-
-                    b.Property<Dictionary<string, object>>("ExtraProperties")
-                        .HasColumnType("jsonb")
-                        .HasColumnName("ExtraProperties");
 
                     b.Property<string>("Permissions")
                         .HasColumnType("text");
@@ -126,10 +191,6 @@ namespace Invoice.Api.Migrations
 
                     b.Property<DateTime?>("CreationDate")
                         .HasColumnType("timestamp with time zone");
-
-                    b.Property<Dictionary<string, object>>("ExtraProperties")
-                        .HasColumnType("jsonb")
-                        .HasColumnName("ExtraProperties");
 
                     b.Property<string>("Properties")
                         .HasColumnType("text");
@@ -179,10 +240,6 @@ namespace Invoice.Api.Migrations
                     b.Property<string>("DisplayNames")
                         .HasColumnType("text");
 
-                    b.Property<Dictionary<string, object>>("ExtraProperties")
-                        .HasColumnType("jsonb")
-                        .HasColumnName("ExtraProperties");
-
                     b.Property<string>("Name")
                         .HasMaxLength(200)
                         .HasColumnType("character varying(200)");
@@ -223,10 +280,6 @@ namespace Invoice.Api.Migrations
 
                     b.Property<DateTime?>("ExpirationDate")
                         .HasColumnType("timestamp with time zone");
-
-                    b.Property<Dictionary<string, object>>("ExtraProperties")
-                        .HasColumnType("jsonb")
-                        .HasColumnName("ExtraProperties");
 
                     b.Property<string>("Payload")
                         .HasColumnType("text");
@@ -304,11 +357,6 @@ namespace Invoice.Api.Migrations
 
                     b.Property<TimeSpan>("ExecutionDuration")
                         .HasColumnType("interval");
-
-                    b.Property<Dictionary<string, object>>("ExtraProperties")
-                        .IsRequired()
-                        .HasColumnType("jsonb")
-                        .HasColumnName("ExtraProperties");
 
                     b.Property<string>("FinishReason")
                         .HasColumnType("text");
@@ -398,11 +446,6 @@ namespace Invoice.Api.Migrations
                     b.Property<int>("EntityVersion")
                         .HasColumnType("integer");
 
-                    b.Property<Dictionary<string, object>>("ExtraProperties")
-                        .IsRequired()
-                        .HasColumnType("jsonb")
-                        .HasColumnName("ExtraProperties");
-
                     b.Property<string>("FileName")
                         .IsRequired()
                         .HasMaxLength(255)
@@ -487,11 +530,6 @@ namespace Invoice.Api.Migrations
                     b.Property<int>("EntityVersion")
                         .HasColumnType("integer");
 
-                    b.Property<Dictionary<string, object>>("ExtraProperties")
-                        .IsRequired()
-                        .HasColumnType("jsonb")
-                        .HasColumnName("ExtraProperties");
-
                     b.Property<bool>("IsActive")
                         .HasColumnType("boolean");
 
@@ -573,11 +611,6 @@ namespace Invoice.Api.Migrations
                     b.Property<int>("EntityVersion")
                         .HasColumnType("integer");
 
-                    b.Property<Dictionary<string, object>>("ExtraProperties")
-                        .IsRequired()
-                        .HasColumnType("jsonb")
-                        .HasColumnName("ExtraProperties");
-
                     b.Property<Guid>("IntegrationCredentialId")
                         .HasColumnType("uuid");
 
@@ -641,11 +674,6 @@ namespace Invoice.Api.Migrations
                     b.Property<int>("EntityVersion")
                         .HasColumnType("integer");
 
-                    b.Property<Dictionary<string, object>>("ExtraProperties")
-                        .IsRequired()
-                        .HasColumnType("jsonb")
-                        .HasColumnName("ExtraProperties");
-
                     b.Property<bool>("IsDeleted")
                         .HasColumnType("boolean");
 
@@ -703,11 +731,6 @@ namespace Invoice.Api.Migrations
 
                     b.Property<int>("EntityVersion")
                         .HasColumnType("integer");
-
-                    b.Property<Dictionary<string, object>>("ExtraProperties")
-                        .IsRequired()
-                        .HasColumnType("jsonb")
-                        .HasColumnName("ExtraProperties");
 
                     b.Property<Guid>("IntegrationId")
                         .HasColumnType("uuid");
@@ -771,11 +794,6 @@ namespace Invoice.Api.Migrations
                     b.Property<int>("EntityVersion")
                         .HasColumnType("integer");
 
-                    b.Property<Dictionary<string, object>>("ExtraProperties")
-                        .IsRequired()
-                        .HasColumnType("jsonb")
-                        .HasColumnName("ExtraProperties");
-
                     b.Property<string>("Interval")
                         .IsRequired()
                         .HasMaxLength(20)
@@ -832,11 +850,6 @@ namespace Invoice.Api.Migrations
 
                     b.Property<int>("EntityVersion")
                         .HasColumnType("integer");
-
-                    b.Property<Dictionary<string, object>>("ExtraProperties")
-                        .IsRequired()
-                        .HasColumnType("jsonb")
-                        .HasColumnName("ExtraProperties");
 
                     b.Property<int>("InvoiceCount")
                         .HasColumnType("integer");
@@ -898,11 +911,6 @@ namespace Invoice.Api.Migrations
                     b.Property<int>("EntityVersion")
                         .HasColumnType("integer");
 
-                    b.Property<Dictionary<string, object>>("ExtraProperties")
-                        .IsRequired()
-                        .HasColumnType("jsonb")
-                        .HasColumnName("ExtraProperties");
-
                     b.Property<bool>("IsDeleted")
                         .HasColumnType("boolean");
 
@@ -946,6 +954,15 @@ namespace Invoice.Api.Migrations
                         .IsUnique();
 
                     b.ToTable("UserSubscriptions");
+                });
+
+            modelBuilder.Entity("Invoices.Domain.InvoiceItem", b =>
+                {
+                    b.HasOne("Invoices.Domain.Invoice", null)
+                        .WithMany("Items")
+                        .HasForeignKey("InvoiceId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
                 });
 
             modelBuilder.Entity("OpenIddict.EntityFrameworkCore.Models.OpenIddictEntityFrameworkCoreAuthorization", b =>
@@ -1068,6 +1085,11 @@ namespace Invoice.Api.Migrations
                         .IsRequired();
 
                     b.Navigation("Plan");
+                });
+
+            modelBuilder.Entity("Invoices.Domain.Invoice", b =>
+                {
+                    b.Navigation("Items");
                 });
 
             modelBuilder.Entity("OpenIddict.EntityFrameworkCore.Models.OpenIddictEntityFrameworkCoreApplication", b =>

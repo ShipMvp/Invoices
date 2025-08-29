@@ -1,13 +1,13 @@
-# Backend (ShipMVP)
+# Invoice Management System
 
-Production-ready **.NET 9** backend using **Clean Architecture**, **EF Core + PostgreSQL**, and **modular plug-ins**.
-This repo consumes the **ShipMVP** backend as a **Git submodule** in `/shipmvp` and keeps your app code separate and fully editable.
+A complete invoice management system built with **.NET 9**, **React**, and **PostgreSQL**, using **Clean Architecture** and **modular design**.
+Features a RESTful API, React frontend, and command-line tools for data management. Built on the **ShipMVP** framework as a Git submodule.
 
 ---
 
 ## Contents
 
-- [Backend (ShipMVP)](#backend-shipmvp)
+- [Invoice Management System](#invoice-management-system)
   - [Contents](#contents)
   - [Architecture](#architecture)
   - [Folder structure](#folder-structure)
@@ -16,6 +16,7 @@ This repo consumes the **ShipMVP** backend as a **Git submodule** in `/shipmvp` 
   - [Configuration](#configuration)
   - [Migrations](#migrations)
   - [Modules (how to add features)](#modules-how-to-add-features)
+  - [Command Line Interface (CLI)](#command-line-interface-cli)
   - [Requests \& examples](#requests--examples)
   - [Troubleshooting](#troubleshooting)
   - [Do not edit `/shipmvp`](#do-not-edit-shipmvp)
@@ -41,24 +42,31 @@ This repo consumes the **ShipMVP** backend as a **Git submodule** in `/shipmvp` 
 apps/
   backend/
     Invoice.Api/            # Host API (runs the app)
-      Program.cs              # DbContext wiring + module discovery + Swagger
-      AppDbContextFactory.cs  # EF design-time factory (points to migrations assembly)
+      Program.cs              # Application startup and module discovery
+      Data/
+        InvoiceDbContext.cs   # Application-specific DbContext
+        InvoiceDbModule.cs    # Database module configuration
       appsettings.json        # ConnectionStrings:Default
-    Invoice.Migrations/     # EF Core migrations project
-      Migrations/             # Generated after first migration
+    Invoice.CLI/            # Command-line interface tool
+      Program.cs              # CLI host with commands (seed-data, run-sql, etc.)
+      appsettings.json        # CLI configuration
+  frontend/                 # React frontend application (Vite + TypeScript)
 modules/
-  Billing/
-    Domain/                   # Entities
-      Invoice.cs
-    Infrastructure/           # EF configurations
-      InvoiceConfig.cs        # IEntityTypeConfiguration<Invoice>
-    BillingModule.cs          # IShipMvpModule (endpoints/DI)
+  Invoices/                 # Invoice management module
+    Domain/                   # Domain entities and interfaces
+      Invoice.cs              # Invoice entity
+      InvoiceItem.cs          # Invoice item entity
+    Application/              # Application services and DTOs
+    Infrastructure/           # Data access and repositories
+    Controllers/              # API controllers
+    InvoicesModule.cs         # Module registration
 
 shipmvp/                      # <Git submodule; do not edit>
-  backend/src/
-    ShipMvp.Abstractions/     # IShipMvpModule interface
-    ShipMvp.Modularity/       # ModuleLoader (discovers & maps modules)
-    ShipMvp.Infrastructure/   # AppDbContext (scans configurations)
+  ShipMvp.Api/              # API framework
+  ShipMvp.Application/      # Application infrastructure
+  ShipMvp.Core/             # Core abstractions and entities
+  ShipMvp.CLI/              # CLI command framework
+  ShipMvp.Domain/           # Domain framework
 ```
 
 ---
@@ -91,14 +99,12 @@ docker run --name shipmvp-postgres \
 
 ```bash
 dotnet ef migrations add Initial \
-  --project apps/backend/Invoice.Migrations \
-  --startup-project apps/backend/Invoice.Api \
-  --context AppDbContext
+  --project apps/backend/Invoice.Api \
+  --context InvoiceDbContext
 
 dotnet ef database update \
-  --project apps/backend/Invoice.Migrations \
-  --startup-project apps/backend/Invoice.Api \
-  --context AppDbContext
+  --project apps/backend/Invoice.Api \
+  --context InvoiceDbContext
 ```
 
 3. **Run the API**:
@@ -107,8 +113,9 @@ dotnet ef database update \
 dotnet run --project apps/backend/Invoice.Api
 ```
 
-* Swagger: `http://localhost:5000/swagger`
+* Swagger: `http://localhost:5066/swagger`
 * Health ping: `GET /` → `{"value":"Invoice API running"}`
+* Frontend: `http://localhost:5173` (when running frontend)
 
 ---
 
@@ -140,20 +147,18 @@ opts.UseNpgsql(cs, b => b.MigrationsAssembly("Invoice.Migrations"));
 
 ## Migrations
 
-* Keep **all migrations** in `apps/backend/Invoice.Migrations/`.
-* The **design-time factory** in `Invoice.Api` ensures EF sees all module mappings.
+* **Entity Framework migrations** are managed through the Invoice.Api project.
+* The **InvoiceDbContext** scans all module assemblies for entity configurations.
 * Typical flow when you add/change entities in any module:
 
 ```bash
-dotnet ef migrations add AddBillingModule \
-  --project apps/backend/Invoice.Migrations \
-  --startup-project apps/backend/Invoice.Api \
-  --context AppDbContext
+dotnet ef migrations add AddInvoiceFeature \
+  --project apps/backend/Invoice.Api \
+  --context InvoiceDbContext
 
 dotnet ef database update \
-  --project apps/backend/Invoice.Migrations \
-  --startup-project apps/backend/Invoice.Api \
-  --context AppDbContext
+  --project apps/backend/Invoice.Api \
+  --context InvoiceDbContext
 ```
 
 > Tip: Use **schemas per module** (e.g., `ToTable("Invoices", "billing")`) to keep the single DB tidy.
@@ -178,97 +183,193 @@ dotnet ef database update \
 **Entity**
 
 ```csharp
-// modules/Billing/Domain/Invoice.cs
-public class Invoice
+// modules/Invoices/Domain/Invoice.cs
+using ShipMvp.Core.Entities;
+
+public class Invoice : AggregateRoot<Guid>
 {
-    public Guid Id { get; set; }
     public string CustomerName { get; set; } = default!;
-    public decimal Amount { get; set; }
-    public DateTime CreatedAt { get; set; }
+    public decimal TotalAmount { get; set; }
+    public InvoiceStatus Status { get; set; } = InvoiceStatus.Draft;
+    public List<InvoiceItem> Items { get; set; } = new();
 }
 ```
 
-**EF mapping**
+**Repository**
 
 ```csharp
-// modules/Billing/Infrastructure/InvoiceConfig.cs
-using Microsoft.EntityFrameworkCore;
-using Microsoft.EntityFrameworkCore.Metadata.Builders;
+// modules/Invoices/Infrastructure/InvoiceRepository.cs
+using ShipMvp.Core.Persistence;
 
-public sealed class InvoiceConfig : IEntityTypeConfiguration<Invoice>
+public class InvoiceRepository : IInvoiceRepository
 {
-    public void Configure(EntityTypeBuilder<Invoice> b)
+    private readonly IDbContext _context;
+
+    public InvoiceRepository(IDbContext context)
     {
-        b.ToTable("Invoices", "billing");
-        b.HasKey(x => x.Id);
-        b.Property(x => x.CustomerName).HasMaxLength(200).IsRequired();
-        b.Property(x => x.Amount).HasColumnType("numeric(18,2)");
-        b.Property(x => x.CreatedAt).HasDefaultValueSql("now()");
+        _context = context;
+    }
+
+    public async Task<Invoice?> GetByIdAsync(Guid id)
+    {
+        return await _context.Set<Invoice>()
+            .Include(i => i.Items)
+            .FirstOrDefaultAsync(i => i.Id == id);
     }
 }
 ```
 
-**Endpoints**
+**Controller**
 
 ```csharp
-// modules/Billing/BillingModule.cs
-using Microsoft.AspNetCore.Routing;
-using Microsoft.EntityFrameworkCore;
-using Microsoft.Extensions.Configuration;
-using Microsoft.Extensions.DependencyInjection;
-using ShipMvp.Abstractions;
-using ShipMvp.Infrastructure;
-
-public sealed class BillingModule : IShipMvpModule
+// modules/Invoices/Controllers/InvoicesController.cs
+[ApiController]
+[Route("api/[controller]")]
+public class InvoicesController : ControllerBase
 {
-    public void ConfigureServices(IServiceCollection services, IConfiguration config) { }
+    private readonly IInvoiceService _invoiceService;
 
-    public void MapEndpoints(IEndpointRouteBuilder endpoints)
+    public InvoicesController(IInvoiceService invoiceService)
     {
-        var g = endpoints.MapGroup("/api/billing/invoices");
+        _invoiceService = invoiceService;
+    }
 
-        g.MapGet("/", async (AppDbContext db) =>
-            await db.Set<Invoice>().OrderByDescending(x => x.CreatedAt).ToListAsync());
+    [HttpGet]
+    public async Task<ActionResult<IEnumerable<Invoice>>> GetInvoices()
+    {
+        var invoices = await _invoiceService.GetAllAsync();
+        return Ok(invoices);
+    }
 
-        g.MapGet("/{id:guid}", async (Guid id, AppDbContext db) =>
-            await db.Set<Invoice>().FindAsync(id) is { } inv ? Results.Ok(inv) : Results.NotFound());
-
-        g.MapPost("/", async (AppDbContext db, Invoice dto) =>
-        {
-            dto.Id = Guid.NewGuid();
-            dto.CreatedAt = DateTime.UtcNow;
-            db.Add(dto);
-            await db.SaveChangesAsync();
-            return Results.Created($"/api/billing/invoices/{dto.Id}", dto);
-        });
+    [HttpPost]
+    public async Task<ActionResult<Invoice>> CreateInvoice(CreateInvoiceRequest request)
+    {
+        var invoice = await _invoiceService.CreateAsync(request);
+        return CreatedAtAction(nameof(GetInvoice), new { id = invoice.Id }, invoice);
     }
 }
 ```
 
-No extra wiring required: `ShipMvp.Modularity` discovers all `IShipMvpModule` implementations at startup and maps them automatically.
+**Module Registration**
+
+```csharp
+// modules/Invoices/InvoicesModule.cs
+using ShipMvp.Core.Modules;
+
+[Module]
+public class InvoicesModule : IModule
+{
+    public void ConfigureServices(IServiceCollection services)
+    {
+        services.AddScoped<IInvoiceRepository, InvoiceRepository>();
+        services.AddScoped<IInvoiceService, InvoiceService>();
+        
+        // Enable controller discovery
+        services.AddControllers()
+            .AddApplicationPart(typeof(InvoicesModule).Assembly);
+    }
+
+    public void Configure(IApplicationBuilder app, IHostEnvironment env)
+    {
+        // Module-specific configuration
+    }
+}
+```
+
+Controllers are automatically discovered from module assemblies using `.AddApplicationPart()`.
 
 ---
+
+
+---
+
+## Command Line Interface (CLI)
+
+The Invoice.CLI provides command-line tools for database management and administrative tasks.
+
+### Available Commands
+
+```bash
+cd apps/backend/Invoice.CLI
+
+# Show all available commands
+dotnet run
+
+# Seed initial application data (users, subscription plans, etc.)
+dotnet run seed-data
+
+# Seed integration platform configurations
+dotnet run seed-integrations
+
+# Execute custom SQL queries
+dotnet run run-sql "SELECT * FROM Invoices"
+
+# Show detailed help
+dotnet run help
+```
+
+### CLI Features
+
+* **Database Management**: Seed data, run migrations, execute queries
+* **Integration Setup**: Configure external service integrations
+* **Administrative Tasks**: User management, system maintenance
+* **Development Tools**: Database inspection and debugging
+
+### CLI Architecture
+
+* **Framework**: Built on ShipMvp.CLI command framework
+* **Dependency Injection**: Inherits all services from Invoice.Api
+* **Database Access**: Uses same InvoiceDbContext as the main application
+* **Modular Commands**: Extensible command system with automatic discovery
 
 ## Requests & examples
 
 Create an invoice:
 
 ```bash
-curl -X POST http://localhost:5000/api/billing/invoices \
+curl -X POST http://localhost:5066/api/invoices \
   -H "Content-Type: application/json" \
-  -d '{"customerName":"Acme","amount":100.0}'
+  -d '{
+    "customerName": "Acme Corp",
+    "totalAmount": 1500.00,
+    "status": "Draft",
+    "items": [
+      {
+        "description": "Consulting Services",
+        "amount": 1500.00
+      }
+    ]
+  }'
 ```
 
 List invoices:
 
 ```bash
-curl http://localhost:5000/api/billing/invoices
+curl http://localhost:5066/api/invoices
 ```
 
 Get by id:
 
 ```bash
-curl http://localhost:5000/api/billing/invoices/<guid>
+curl http://localhost:5066/api/invoices/<guid>
+```
+
+Mark invoice as paid:
+
+```bash
+curl -X POST http://localhost:5066/api/invoices/<guid>/mark-as-paid
+```
+
+Update invoice:
+
+```bash
+curl -X PUT http://localhost:5066/api/invoices/<guid> \
+  -H "Content-Type: application/json" \
+  -d '{
+    "customerName": "Updated Customer Name",
+    "totalAmount": 2000.00,
+    "status": "Sent"
+  }'
 ```
 
 ---
